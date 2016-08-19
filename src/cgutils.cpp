@@ -130,17 +130,20 @@ static DIType julia_type_to_di(jl_value_t *jt, DIBuilder *dbuilder, bool isboxed
     else if (jl_is_structtype(jt)) {
         jl_datatype_t *jst = (jl_datatype_t*)jt;
         size_t ntypes = jl_datatype_nfields(jst);
+        const char *tname = jl_symbol_name(jdt->name->name);
         llvm::DICompositeType *ct = dbuilder->createStructType(
             NULL,                       // Scope
-            jl_symbol_name(jdt->name->name),      // Name
+            tname,                      // Name
             NULL,                       // File
             0,                          // LineNumber
             8 * jdt->size,              // SizeInBits
-            8 * jdt->layout->alignment, // AlignmentInBits
+            8 * jdt->layout->alignment, // AlignInBits
             0,                          // Flags
             NULL,                       // DerivedFrom
             DINodeArray(),              // Elements
-            dwarf::DW_LANG_Julia        // RuntimeLanguage
+            dwarf::DW_LANG_Julia,       // RuntimeLanguage
+            nullptr,                    // VTableHolder
+            tname + std::to_string(globalUnique++) // UniqueIdentifier
             );
         jdt->ditype = ct;
         std::vector<llvm::Metadata*> Elements;
